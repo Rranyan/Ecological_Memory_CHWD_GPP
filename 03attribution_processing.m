@@ -29,11 +29,21 @@
 %   1:22 = 2000-2021
 %   23   = 2022
 %
+% Note: NetCDF dimension ordering may appear differently when read in
+% Python and MATLAB because of their respective array-order conventions.
+% The code below follows the MATLAB representation returned by ncread.
+%
 % Example public directory structure:
 %
 % project_data/
-% ├── observed_gpp/
-% │   └── observed_gpp_<month>.nc
+% ├── inputs/
+% │   └── <region>/
+% │       ├── gpp_<month>.nc
+% │       ├── soil_moisture_<month>.nc
+% │       ├── precipitation_<month>.nc
+% │       ├── air_temperature_<month>.nc
+% │       ├── vapor_pressure_deficit_<month>.nc
+% │       └── solar_radiation_<month>.nc
 % │
 % └── model_predictions/
 %     └── <region>/
@@ -109,7 +119,7 @@ n_months = numel(analysis_months);
 % 3. PUBLIC DIRECTORY AND FILE-NAME TEMPLATES
 % ========================================================================
 
-observed_dir = fullfile(cfg.data_root, 'observed_gpp');
+observed_dir = fullfile(cfg.data_root, 'inputs', cfg.region);
 
 prediction_root = fullfile( ...
     cfg.data_root, 'model_predictions', cfg.region, cfg.model);
@@ -143,7 +153,7 @@ if cfg.run_legacy_by_lag
         month_name = analysis_months{m};
 
         observed_file = fullfile( ...
-            observed_dir, sprintf('observed_gpp_%s.nc', month_name));
+            observed_dir, sprintf('gpp_%s.nc', month_name));
 
         reference_file = fullfile( ...
             reference_dir, sprintf('reference_prediction_%s.nc', month_name));
@@ -241,7 +251,7 @@ if cfg.run_process_split
         month_name = analysis_months{m};
 
         observed_file = fullfile( ...
-            observed_dir, sprintf('observed_gpp_%s.nc', month_name));
+            observed_dir, sprintf('gpp_%s.nc', month_name));
 
         reference_file = fullfile( ...
             reference_dir, sprintf('reference_prediction_%s.nc', month_name));
@@ -354,7 +364,7 @@ if cfg.run_driver_split
         month_name = analysis_months{m};
 
         observed_file = fullfile( ...
-            observed_dir, sprintf('observed_gpp_%s.nc', month_name));
+            observed_dir, sprintf('gpp_%s.nc', month_name));
 
         reference_file = fullfile( ...
             reference_dir, sprintf('reference_prediction_%s.nc', month_name));
@@ -500,10 +510,18 @@ function regional_mean = ...
     climatology_2000_2021 = nanmean(data(:,:,1:22), 3);
     anomaly_2022 = data(:,:,23) - climatology_2000_2021;
 
-    weighted_anomaly = anomaly_2022 .* latitude_weight;
-    weighted_anomaly(~region_mask) = NaN;
+    valid = region_mask & ...
+            isfinite(anomaly_2022) & ...
+            isfinite(latitude_weight);
 
-    regional_mean = nanmean(weighted_anomaly(:));
+    if ~any(valid(:))
+        regional_mean = NaN;
+        return
+    end
+
+    regional_mean = ...
+        sum(anomaly_2022(valid) .* latitude_weight(valid), 'omitnan') / ...
+        sum(latitude_weight(valid), 'omitnan');
 end
 
 
