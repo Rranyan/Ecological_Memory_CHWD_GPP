@@ -15,5 +15,11 @@ The analyses focus on China, Europe, and the United States during the 2022 CHWD 
 
 ```text
 01CHWD_Gumbel_Copula.m
-02ML_attribution_revised.py
-03attribution_processing_revised.m
+02ML_attribution.py
+03attribution_processing.m
+
+
+## Software
+
+- MATLAB
+- Python
