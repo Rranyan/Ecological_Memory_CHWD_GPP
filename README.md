@@ -23,3 +23,8 @@ The analyses focus on China, Europe, and the United States during the 2022 CHWD 
 
 - MATLAB
 - Python
+
+## Citation
+
+The archived code release is available at Zenodo:
+https://doi.org/10.5281/zenodo.22792121
