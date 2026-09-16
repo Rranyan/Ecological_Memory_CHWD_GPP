@@ -216,3 +216,31 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# MATLAB temporary files
+*.asv
+*.autosave
+*.m~
+slprj/
+codegen/
+
+# Large research data
+*.nc
+*.nc4
+*.tif
+*.tiff
+*.h5
+*.hdf
+*.hdf5
+*.mat
+
+# Research outputs
+data/
+raw_data/
+outputs/
+results/
+
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini
